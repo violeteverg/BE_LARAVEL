@@ -107,7 +107,7 @@ class CustomerController extends Controller
             $validated = $request->validate([
                 'name' => 'nullable|string',
                 'address' => 'nullable|string',
-                'gender' => 'nullable|string|in:PRIA,WANITA',
+                'gender' => 'nullable|string|in:pria,wanita',
             ]);
 
             $customer->update($validated);
@@ -150,4 +150,30 @@ class CustomerController extends Controller
             ], 404);
         }
     }
+
+    public function getSimpleList(Request $request)
+    {
+        try {
+            $query = Customer::query();
+
+            if ($request->has('search')) {
+                $query->where('name', 'like', '%' . $request->search . '%');
+            }
+
+            $customers = $query->select('id', 'name','id_customer')->get();
+
+            return response()->json([
+                'message' => 'Successfully fetched simplified customer data',
+                'status' => 'Success',
+                'data' => $customers,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    
 }

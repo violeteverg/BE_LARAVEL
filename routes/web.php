@@ -12,3 +12,6 @@ Route::get('/', function () {
 Route::apiResource('customer',CustomerController::class);
 Route::apiResource('product',ProductController::class);
 Route::apiResource('transaction',TransactionController::class);
+
+Route::get('/customers/listCustomer', [CustomerController::class, 'getSimpleList']);
+Route::get('/products/listProduct', [ProductController::class, 'getLightweightList']);

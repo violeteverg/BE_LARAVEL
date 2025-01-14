@@ -150,4 +150,21 @@ class ProductController extends Controller
             ], 404);
         }
     }
+    public function getLightweightList()
+    {
+        try {
+            $products = Product::select('id', 'name','product_code')->get();
+
+            return response()->json([
+                'message' => 'Successfully fetched lightweight product data',
+                'status' => 'Success',
+                'data' => $products,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
