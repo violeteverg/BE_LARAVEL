@@ -147,17 +147,20 @@ class TransactionController extends Controller
             $validated = $request->validate([
                 'bill_id' => 'nullable|string|unique:transactions,bill_id,' . $id,
                 'date' => 'nullable|date',
-                'subtotal' => 'nullable|integer',
                 'customer_id' => 'nullable|exists:customers,id',
                 'products' => 'nullable|array',
                 'products.*.product_id' => 'nullable|exists:products,id',
                 'products.*.quantity' => 'nullable|integer|min:1',
             ]);
-
-            $transaction->update($validated);
+            $transaction->update(collect($validated)->except('products')->toArray());
 
             if (isset($validated['products'])) {
+                $subtotal = 0;
+
                 foreach ($validated['products'] as $productData) {
+                    $product = Product::findOrFail($productData['product_id']);
+                    $subtotal += $product->price * $productData['quantity'];
+
                     ProductTransaction::updateOrCreate(
                         [
                             'transaction_id' => $transaction->id,
@@ -166,6 +169,7 @@ class TransactionController extends Controller
                         ['quantity' => $productData['quantity']]
                     );
                 }
+                $transaction->update(['subtotal' => $subtotal]);
             }
 
             return response()->json([
@@ -185,6 +189,7 @@ class TransactionController extends Controller
             ], 500);
         }
     }
+
 
     /**
      * Remove the specified resource from storage.
